@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>认读汉字游戏 - 教师版</title>
+    <!-- 引入Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js"></script>
+    <style>
+        /* 保持教师版原有样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e6f7ff 0%, #cceeff 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.15);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #b3e0ff;
+        }
+        
+        h1 {
+            color: #0066cc;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background-color: #f0f9ff;
+            border-radius: 8px;
+            padding: 5px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background-color: #4da6ff;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .teacher-section {
+            background-color: #f0f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .teacher-section h2 {
+            color: #0066cc;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border: 1px solid #b3e0ff;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            resize: vertical;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border: 1px solid #4da6ff;
+            box-shadow: 0 0 8px rgba(77, 166, 255, 0.3);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .button-group button {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .import-btn {
+            background: linear-gradient(to bottom, #4da6ff, #3399ff) !important;
+        }
+        
+        .add-btn {
+            background: linear-gradient(to bottom, #66cc66, #33aa33) !important;
+        }
+        
+        .clear-btn {
+            background: linear-gradient(to bottom, #ff6666, #ff3333) !important;
+        }
+        
+        .import-btn:hover {
+            background: linear-gradient(to bottom, #3399ff, #1a8cff) !important;
+        }
+        
+        .add-btn:hover {
+            background: linear-gradient(to bottom, #33aa33, #228822) !important;
+        }
+        
+        .clear-btn:hover {
+            background: linear-gradient(to bottom, #ff3333, #ff0000) !important;
+        }
+        
+        button {
+            padding: 14px 28px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 102, 204, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 102, 204, 0.3);
+        }
+        
+        .words-preview {
+            background-color: #f0f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .words-preview h3 {
+            color: #0066cc;
+            margin-bottom: 15px;
+        }
+        
+        .words-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #e6f7ff;
+            border-radius: 8px;
+        }
+        
+        .word-item {
+            background-color: #d9ecff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            border: 1px solid #b3e0ff;
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f0f9ff;
+            border-radius: 12px;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #0066cc;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .stats span {
+            background-color: #e6f9ff;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .action-result {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        
+        .success {
+            background-color: #ccffcc;
+            color: #006600;
+            border: 1px solid #00cc00;
+        }
+        
+        .info {
+            background-color: #e6f7ff;
+            color: #0066cc;
+            border: 1px solid #4da6ff;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        /* 成绩查看样式 */
+        .scores-section {
+            background-color: #f0f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .scores-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background-color: #e6f7ff;
+            border-radius: 8px;
+            border-left: 4px solid #4da6ff;
+        }
+        
+        .score-item:nth-child(-n+3) {
+            border-left-color: gold;
+        }
+        
+        .score-rank {
+            font-weight: bold;
+            font-size: 1.2rem;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .score-name {
+            flex: 1;
+            margin-left: 15px;
+            font-weight: bold;
+        }
+        
+        .score-gold {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+        
+        .score-gold .gold-icon {
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle at 30% 30%, #FFD700, #FFA500);
+            border-radius: 50%;
+        }
+        
+        .no-scores {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .export-btn {
+            background: linear-gradient(to bottom, #ff9966, #ff6633) !important;
+            margin-top: 15px;
+        }
+        
+        .export-btn:hover {
+            background: linear-gradient(to bottom, #ff6633, #ff3300) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>认读汉字游戏 - 教师版</h1>
+            <p class="subtitle">管理词汇表，查看所有学生成绩</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="words">词汇管理</div>
+            <div class="tab" data-tab="scores">查看成绩</div>
+        </div>
+        
+        <!-- 词汇管理标签页 -->
+        <div class="tab-content active" id="words-tab">
+            <div class="teacher-section">
+                <h2>词汇表管理</h2>
+                <div class="input-group">
+                    <textarea id="import-words" placeholder="请输入词汇，每行一个词语&#10;格式：汉字 (拼音)&#10;例如：&#10;苹果 (píng guǒ)&#10;香蕉 (xiāng jiāo)&#10;电脑 (diàn nǎo)&#10;&#10;或者只输入汉字，系统会自动生成拼音：&#10;学生&#10;老师&#10;学校"></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button id="import-btn" class="import-btn">导入词汇表</button>
+                    <button id="add-btn" class="add-btn">添加词汇</button>
+                    <button id="clear-btn" class="clear-btn">清除词汇表</button>
+                </div>
+                
+                <div id="action-result" class="action-result info">
+                    当前词汇表为空，请导入或添加词汇
+                </div>
+                
+                <div class="stats">
+                    <span>单字词: <span id="single-char-count">0</span> 个</span>
+                    <span>多字词: <span id="multi-char-count">0</span> 个</span>
+                    <span>总计: <span id="total-words-count">0</span> 个词汇</span>
+                </div>
+                
+                <div class="words-preview">
+                    <h3>当前词汇表预览</h3>
+                    <div class="words-list" id="words-preview-list">
+                        <!-- 词汇预览将显示在这里 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 成绩查看标签页 -->
+        <div class="tab-content" id="scores-tab">
+            <div class="scores-section">
+                <h2>学生成绩查看</h2>
+                <div class="action-result info">
+                    实时同步所有学生成绩，数据存储在云端
+                </div>
+                
+                <div class="stats">
+                    <span>总学生数: <span id="total-students">0</span> 人</span>
+                    <span>最高分: <span id="highest-score">0</span> 金币</span>
+                    <span>平均分: <span id="average-score">0</span> 金币</span>
+                </div>
+                
+                <div class="scores-list" id="scores-list">
+                    <!-- 成绩列表将显示在这里 -->
+                </div>
+                
+                <button id="refresh-scores" class="import-btn">刷新成绩</button>
+                <button id="export-scores" class="export-btn">导出成绩</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>使用说明</h3>
+            <ul>
+                <li><strong>词汇管理：</strong>导入、添加或清除词汇表（会同步到学生端游戏）</li>
+                <li><strong>查看成绩：</strong>实时查看所有学生的游戏成绩，支持导出为CSV表格</li>
+                <li><strong>学生端链接：</strong>请将学生版游戏链接分发给学生，成绩会自动同步到此处</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyCH5NQvOnKyi_DMmE0H7ABbh1i7TaG14Q8",
+          authDomain: "chinese-games-6e129.firebaseapp.com",
+          projectId: "chinese-games-6e129",
+          storageBucket: "chinese-games-6e129.firebasestorage.app",
+          messagingSenderId: "836118449937",
+          appId: "1:836118449937:web:60f37c898915971dbe06b0",
+          measurementId: "G-8ZBVR53Q0D",
+          databaseURL: "https://chinese-games-6e129-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+
+        // 初始化Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // DOM元素
+        const importWordsTextarea = document.getElementById('import-words');
+        const importButton = document.getElementById('import-btn');
+        const addButton = document.getElementById('add-btn');
+        const clearButton = document.getElementById('clear-btn');
+        const wordsPreviewList = document.getElementById('words-preview-list');
+        const actionResult = document.getElementById('action-result');
+        const singleCharCount = document.getElementById('single-char-count');
+        const multiCharCount = document.getElementById('multi-char-count');
+        const totalWordsCount = document.getElementById('total-words-count');
+        
+        // 成绩相关元素
+        const scoresList = document.getElementById('scores-list');
+        const totalStudents = document.getElementById('total-students');
+        const highestScore = document.getElementById('highest-score');
+        const averageScore = document.getElementById('average-score');
+        const refreshScoresButton = document.getElementById('refresh-scores');
+        const exportScoresButton = document.getElementById('export-scores');
+
+        // 标签页切换
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                if (tab.dataset.tab === 'scores') {
+                    loadScores();
+                }
+            });
+        });
+
+        // 拼音转换函数
+        function convertToPinyin(word) {
+            const pinyinMap = {
+                '人': 'rén', '山': 'shān', '水': 'shuǐ', '火': 'huǒ',
+                '木': 'mù', '日': 'rì', '月': 'yuè', '口': 'kǒu',
+                '大': 'dà', '小': 'xiǎo', '上': 'shàng', '下': 'xià',
+                '中': 'zhōng', '国': 'guó', '我': 'wǒ', '你': 'nǐ',
+                '他': 'tā', '她': 'tā', '它': 'tā', '是': 'shì',
+                '不': 'bù', '有': 'yǒu', '在': 'zài', '了': 'le',
+                '的': 'de', '和': 'hé', '一': 'yī', '二': 'èr',
+                '三': 'sān', '四': 'sì', '五': 'wǔ', '六': 'liù',
+                '七': 'qī', '八': 'bā', '九': 'jiǔ', '十': 'shí',
+                '中国': 'zhōng guó', '朋友': 'péng yǒu', '学习': 'xué xí',
+                '老师': 'lǎo shī', '学生': 'xué shēng', '谢谢': 'xiè xiè',
+                '再见': 'zài jiàn', '你好': 'nǐ hǎo', '苹果': 'píng guǒ',
+                '香蕉': 'xiāng jiāo', '电脑': 'diàn nǎo', '手机': 'shǒu jī',
+                '电视': 'diàn shì', '书本': 'shū běn', '学校': 'xué xiào',
+                '家庭': 'jiā tíng', '工作': 'gōng zuò', '生活': 'shēng huó'
+            };
+            
+            if (!pinyinMap[word]) {
+                let result = '';
+                for (let i = 0; i < word.length; i++) {
+                    const char = word[i];
+                    result += (pinyinMap[char] || '?') + ' ';
+                }
+                return result.trim();
+            }
+            return pinyinMap[word];
+        }
+
+        // 解析导入的词语
+        function parseImportedWords(text) {
+            const lines = text.split('\n');
+            const words = [];
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                const match = line.match(/(.+?)\s*\((.+?)\)/);
+                if (match) {
+                    const character = match[1].trim();
+                    const pinyin = match[2].trim();
+                    words.push({ character, pinyin });
+                } else {
+                    const character = line;
+                    const pinyin = convertToPinyin(character);
+                    words.push({ character, pinyin });
+                }
+            });
+            return words;
+        }
+
+        // 更新词汇预览
+        function updateWordsPreview(words) {
+            wordsPreviewList.innerHTML = '';
+            if (words.length === 0) {
+                wordsPreviewList.innerHTML = '<p>暂无词汇，请导入或添加词汇</p>';
+                return;
+            }
+            words.forEach(word => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                wordItem.textContent = `${word.character} (${word.pinyin})`;
+                wordsPreviewList.appendChild(wordItem);
+            });
+        }
+
+        // 更新统计信息
+        function updateStats(words) {
+            const singleCharWords = words.filter(word => word.character.length === 1);
+            const multiCharWords = words.filter(word => word.character.length > 1);
+            singleCharCount.textContent = singleCharWords.length;
+            multiCharCount.textContent = multiCharWords.length;
+            totalWordsCount.textContent = words.length;
+        }
+
+        // 显示操作结果
+        function showResult(message, isSuccess = true) {
+            actionResult.textContent = message;
+            actionResult.className = `action-result ${isSuccess ? 'success' : 'info'}`;
+            setTimeout(() => { actionResult.style.display = 'none'; }, 3000);
+        }
+
+        // 从云端获取词汇表
+        function getWordsFromCloud() {
+            return new Promise((resolve) => {
+                db.ref('words').once('value', (snapshot) => {
+                    const words = snapshot.val() || [];
+                    resolve(words);
+                });
+            });
+        }
+
+        // 保存词汇表到云端
+        function saveWordsToCloud(words) {
+            db.ref('words').set(words);
+        }
+
+        // 导入词汇（替换）
+        importButton.addEventListener('click', async () => {
+            const text = importWordsTextarea.value.trim();
+            if (!text) {
+                showResult('请输入要导入的词汇！', false);
+                return;
+            }
+            const words = parseImportedWords(text);
+            if (words.length === 0) {
+                showResult('没有找到有效的词汇！', false);
+                return;
+            }
+            saveWordsToCloud(words);
+            updateWordsPreview(words);
+            updateStats(words);
+            importWordsTextarea.value = '';
+            showResult(`成功导入 ${words.length} 个词汇！已同步到学生端。`);
+        });
+
+        // 添加词汇（追加）
+        addButton.addEventListener('click', async () => {
+            const text = importWordsTextarea.value.trim();
+            if (!text) {
+                showResult('请输入要添加的词汇！', false);
+                return;
+            }
+            const newWords = parseImportedWords(text);
+            if (newWords.length === 0) {
+                showResult('没有找到有效的词汇！', false);
+                return;
+            }
+            const currentWords = await getWordsFromCloud();
+            const existingCharacters = new Set(currentWords.map(word => word.character));
+            const uniqueNewWords = newWords.filter(word => !existingCharacters.has(word.character));
+            if (uniqueNewWords.length === 0) {
+                showResult('所有词汇都已存在！', false);
+                return;
+            }
+            const mergedWords = [...currentWords, ...uniqueNewWords];
+            saveWordsToCloud(mergedWords);
+            updateWordsPreview(mergedWords);
+            updateStats(mergedWords);
+            importWordsTextarea.value = '';
+            showResult(`成功添加 ${uniqueNewWords.length} 个新词汇！`);
+        });
+
+        // 清除词汇表
+        clearButton.addEventListener('click', () => {
+            if (confirm('确定要清除所有词汇吗？学生端游戏也会同步清空！')) {
+                saveWordsToCloud([]);
+                updateWordsPreview([]);
+                updateStats([]);
+                importWordsTextarea.value = '';
+                showResult('词汇表已清除，学生端已同步！');
+            }
+        });
+
+        // 从云端加载所有学生成绩
+        function loadScores() {
+            db.ref('studentScores').once('value', (snapshot) => {
+                const scoresData = snapshot.val() || {};
+                const leaderboard = Object.values(scoresData);
+                
+                totalStudents.textContent = leaderboard.length;
+                if (leaderboard.length === 0) {
+                    highestScore.textContent = '0';
+                    averageScore.textContent = '0';
+                    scoresList.innerHTML = '<div class="no-scores">暂无学生成绩，请等待学生完成游戏</div>';
+                    return;
+                }
+                
+                const scores = leaderboard.map(s => s.gold);
+                const maxScore = Math.max(...scores);
+                const avgScore = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+                highestScore.textContent = maxScore.toFixed(1);
+                averageScore.textContent = avgScore;
+                
+                const sortedScores = [...leaderboard].sort((a, b) => b.gold - a.gold);
+                scoresList.innerHTML = '';
+                sortedScores.forEach((student, index) => {
+                    const scoreItem = document.createElement('div');
+                    scoreItem.className = 'score-item';
+                    scoreItem.innerHTML = `
+                        <div class="score-rank">${index + 1}</div>
+                        <div class="score-name">${student.name}</div>
+                        <div class="score-gold">
+                            <div class="gold-icon"></div>
+                            <span>${student.gold.toFixed(1)}</span>
+                        </div>
+                    `;
+                    scoresList.appendChild(scoreItem);
+                });
+            });
+        }
+
+        // 刷新成绩
+        refreshScoresButton.addEventListener('click', loadScores);
+
+        // 导出成绩为CSV
+        exportScoresButton.addEventListener('click', () => {
+            db.ref('studentScores').once('value', (snapshot) => {
+                const scoresData = snapshot.val() || {};
+                const leaderboard = Object.values(scoresData);
+                if (leaderboard.length === 0) {
+                    alert('暂无成绩可导出！');
+                    return;
+                }
+                const sortedScores = [...leaderboard].sort((a, b) => b.gold - a.gold);
+                let csvContent = "排名,姓名,金币数量,完成时间\n";
+                sortedScores.forEach((student, index) => {
+                    csvContent += `${index + 1},${student.name},${student.gold.toFixed(1)},${student.time}\n`;
+                });
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `学生成绩_${new Date().toLocaleDateString()}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        });
+
+        // 初始化加载
+        async function init() {
+            const savedWords = await getWordsFromCloud();
+            updateWordsPreview(savedWords);
+            updateStats(savedWords);
+            if (savedWords.length > 0) {
+                showResult(`已加载 ${savedWords.length} 个词汇，学生端已同步。`);
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
