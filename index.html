@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>汉字配对游戏</title>
+    <title>Trò chơi nhận biết chữ Hán</title>
     <style>
         * {
             margin: 0;
@@ -63,6 +63,7 @@
             font-size: 2.8rem;
             margin-bottom: 10px;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            font-family: "Calibri", sans-serif;
         }
         
         .subtitle {
@@ -98,6 +99,7 @@
             gap: 10px;
         }
         
+        /* 优化黄金图标样式 */
         .gold-icon {
             width: 36px;
             height: 36px;
@@ -213,6 +215,7 @@
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-family: "Calibri", sans-serif;
         }
         
         button:hover {
@@ -243,6 +246,7 @@
         .gold-box h3 {
             margin-right: 15px;
             color: #8b4513;
+            font-family: "Calibri", sans-serif;
             font-size: 1.4rem;
         }
         
@@ -255,6 +259,7 @@
             min-height: 40px;
         }
         
+        /* 优化黄金块样式 */
         .gold-piece {
             width: 28px;
             height: 28px;
@@ -283,7 +288,7 @@
             justify-content: center;
             align-items: center;
             animation: goldAppear 0.5s ease-out;
-            clip-path: inset(0 50% 0 0);
+            clip-path: inset(0 50% 0 0); /* 右侧裁剪半块黄金 */
         }
         
         .gold-piece::before, .gold-piece-half::before {
@@ -315,6 +320,7 @@
             margin-bottom: 15px;
             color: #8b4513;
             font-size: 1.3rem;
+            font-family: "KaiTi", serif;
         }
         
         .instructions ul {
@@ -335,6 +341,7 @@
         .leaderboard-header h2 {
             color: #8b4513;
             font-size: 1.8rem;
+            font-family: "Calibri", sans-serif;
         }
         
         .player-info {
@@ -471,6 +478,10 @@
             button {
                 width: 80%;
             }
+            
+            .player-input {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -478,11 +489,12 @@
     <div class="container">
         <div class="game-area">
             <header>
-                <h1>汉字配对游戏</h1>
-                <p class="subtitle">匹配汉字与拼音，赢取金币！</p>
+                <h1>Nhận biết chữ Hán</h1>
+                <p class="subtitle">Ghép chữ Hán với phiên âm tương ứng, nhận vàng!</p>
             </header>
             
             <div class="game-info">
+                <!-- 移除了"Vòng"和数字之间的空格 -->
                 <div class="level-info">Vòng<span id="current-level">1</span></div>
                 <div class="gold-info">
                     <div class="gold-container">
@@ -493,47 +505,48 @@
             </div>
             
             <div class="game-board" id="game-board">
-                <!-- 卡片将动态生成 -->
+                <!-- 卡片将通过JavaScript动态生成 -->
             </div>
             
             <div class="controls">
-                <button id="start-btn">开始</button>
-                <button id="reset-btn">重置</button>
+                <button id="start-btn">Bắt đầu</button>
+                <button id="reset-btn">Đặt lại</button>
             </div>
             
             <div class="gold-box">
-                <h3>金币盒: </h3>
+                <h3>Rương vàng: </h3>
                 <div class="gold-box-content" id="gold-box">
-                    <!-- 金币将动态添加 -->
+                    <!-- 黄金将通过JavaScript动态添加 -->
                 </div>
             </div>
             
             <div class="instructions">
-                <h3>游戏说明</h3>
+                <h3>Hướng dẫn</h3>
                 <ul>
-                    <li>选择汉字与对应的拼音进行匹配</li>
-                    <li>匹配正确：卡片变绿并获得1枚金币</li>
-                    <li>匹配错误：卡片变红并扣除0.5枚金币</li>
-                    <li>第一关：单字与单音节词</li>
-                    <li>第二关：多音节词</li>
+                    <li>Chọn chữ Hán với pinyin tương ứng</li>
+                    <li>Ghép đúng: thẻ chuyển xanh và nhận đồng vàng</li>
+                    <li>Ghép sai: thẻ chuyển đỏ và mất nửa đồng vàng</li>
+                    <li>Vòng 1: Chữ đơn và từ đơn âm tiết</li>
+                    <li>Vòng 2: Từ đa âm tiết</li>
+                    <li>Từ vựng do giáo viên cung cấp</li>
                 </ul>
             </div>
         </div>
         
         <div class="leaderboard-area">
             <div class="leaderboard-header">
-                <h2>排行榜</h2>
+                <h2>Bảng xếp hạng</h2>
             </div>
             
             <div class="player-info">
                 <div class="player-input">
-                    <input type="text" id="player-name" placeholder="输入姓名">
-                    <button id="save-player-btn">保存</button>
+                    <input type="text" id="player-name" placeholder="Nhập tên">
+                    <button id="save-player-btn">Lưu</button>
                 </div>
             </div>
             
             <div class="leaderboard-list" id="leaderboard-list">
-                <!-- 排行榜将动态生成 -->
+                <!-- 排行榜将通过JavaScript动态生成 -->
             </div>
         </div>
     </div>
@@ -551,26 +564,8 @@
             gameStarted: false,
             currentPlayer: null,
             words: {
-                level1: [
-                    { character: '人', pinyin: 'rén' },
-                    { character: '山', pinyin: 'shān' },
-                    { character: '水', pinyin: 'shuǐ' },
-                    { character: '火', pinyin: 'huǒ' },
-                    { character: '木', pinyin: 'mù' },
-                    { character: '日', pinyin: 'rì' },
-                    { character: '月', pinyin: 'yuè' },
-                    { character: '口', pinyin: 'kǒu' }
-                ],
-                level2: [
-                    { character: '中国', pinyin: 'zhōng guó' },
-                    { character: '朋友', pinyin: 'péng yǒu' },
-                    { character: '学习', pinyin: 'xué xí' },
-                    { character: '老师', pinyin: 'lǎo shī' },
-                    { character: '学生', pinyin: 'xué shēng' },
-                    { character: '谢谢', pinyin: 'xiè xie' },
-                    { character: '再见', pinyin: 'zài jiàn' },
-                    { character: '你好', pinyin: 'nǐ hǎo' }
-                ]
+                level1: [],
+                level2: []
             },
             currentRoundWords: []
         };
@@ -587,6 +582,46 @@
         const savePlayerButton = document.getElementById('save-player-btn');
         const leaderboardList = document.getElementById('leaderboard-list');
 
+        function loadTeacherWords() {
+            const teacherWords = JSON.parse(localStorage.getItem('teacherWords')) || [];
+            
+            gameState.words.level1 = [];
+            gameState.words.level2 = [];
+            
+            teacherWords.forEach(word => {
+                if (word.character.length === 1) {
+                    gameState.words.level1.push(word);
+                } else {
+                    gameState.words.level2.push(word);
+                }
+            });
+            
+            if (teacherWords.length === 0) {
+                gameState.words.level1 = [
+                    { character: '人', pinyin: 'rén' },
+                    { character: '山', pinyin: 'shān' },
+                    { character: '水', pinyin: 'shuǐ' },
+                    { character: '火', pinyin: 'huǒ' },
+                    { character: '木', pinyin: 'mù' },
+                    { character: '日', pinyin: 'rì' },
+                    { character: '月', pinyin: 'yuè' },
+                    { character: '口', pinyin: 'kǒu' }
+                ];
+                gameState.words.level2 = [
+                    { character: '中国', pinyin: 'zhōng guó' },
+                    { character: '朋友', pinyin: 'péng yǒu' },
+                    { character: '学习', pinyin: 'xué xí' },
+                    { character: '老师', pinyin: 'lǎo shī' },
+                    { character: '学生', pinyin: 'xué shēng' },
+                    { character: '谢谢', pinyin: 'xiè xiè' },
+                    { character: '再见', pinyin: 'zài jiàn' },
+                    { character: '你好', pinyin: 'nǐ hǎo' }
+                ];
+            }
+            
+            updateTotalRounds();
+        }
+
         function updateTotalRounds() {
             const currentLevelWords = gameState.words[`level${gameState.currentLevel}`];
             gameState.totalRounds = Math.ceil(currentLevelWords.length / 4);
@@ -596,6 +631,7 @@
             const currentLevelWords = gameState.words[`level${gameState.currentLevel}`];
             const startIndex = (gameState.currentRound - 1) * 4;
             const endIndex = Math.min(startIndex + 4, currentLevelWords.length);
+            
             return currentLevelWords.slice(startIndex, endIndex);
         }
 
@@ -606,6 +642,15 @@
             gameState.isProcessing = false;
             
             gameState.currentRoundWords = getCurrentRoundWords();
+            
+            if (gameState.currentRoundWords.length === 0) {
+                gameBoard.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                    <h3>${gameState.currentLevel === 1 ? 'Vòng1 cần chữ đơn' : 'Vòng2 cần từ đa âm tiết'}</h3>
+                    <p>Vui lòng đợi giáo viên nhập thêm từ vựng</p>
+                </div>`;
+                gameState.totalPairs = 0;
+                return;
+            }
             
             const cardPairs = [];
             gameState.currentRoundWords.forEach(word => {
@@ -723,56 +768,48 @@
                     savePlayerScore();
                     
                     setTimeout(() => {
-                        alert(`恭喜！你已完成所有关卡，获得${gameState.gold.toFixed(1)}枚金币！`);
+                        alert(`Chúc mừng! Bạn đã hoàn thành tất cả vòng chơi! Nhận được ${gameState.gold.toFixed(1)} vàng!`);
                     }, 500);
                 }
             }
         }
 
         function playCorrectSound() {
-            try {
-                const context = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = context.createOscillator();
-                const gainNode = context.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(context.destination);
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(523.25, context.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(1046.50, context.currentTime + 0.3);
-                
-                gainNode.gain.setValueAtTime(0.3, context.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3);
-                
-                oscillator.start();
-                oscillator.stop(context.currentTime + 0.3);
-            } catch (e) {
-                console.log("音效播放失败:", e);
-            }
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(523.25, context.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1046.50, context.currentTime + 0.3);
+            
+            gainNode.gain.setValueAtTime(0.3, context.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3);
+            
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.3);
         }
 
         function playIncorrectSound() {
-            try {
-                const context = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = context.createOscillator();
-                const gainNode = context.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(context.destination);
-                
-                oscillator.type = 'sawtooth';
-                oscillator.frequency.setValueAtTime(392.00, context.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(196.00, context.currentTime + 0.5);
-                
-                gainNode.gain.setValueAtTime(0.3, context.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
-                
-                oscillator.start();
-                oscillator.stop(context.currentTime + 0.5);
-            } catch (e) {
-                console.log("音效播放失败:", e);
-            }
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(392.00, context.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(196.00, context.currentTime + 0.5);
+            
+            gainNode.gain.setValueAtTime(0.3, context.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
+            
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.5);
         }
 
         function addGold(amount) {
@@ -780,7 +817,11 @@
             updateGoldDisplay();
             
             const goldPiece = document.createElement('div');
-            goldPiece.className = amount === 1 ? 'gold-piece' : 'gold-piece-half';
+            if (amount === 1) {
+                goldPiece.className = 'gold-piece';
+            } else {
+                goldPiece.className = 'gold-piece-half';
+            }
             goldBoxElement.appendChild(goldPiece);
         }
 
@@ -821,7 +862,7 @@
             const sortedLeaderboard = [...leaderboard].sort((a, b) => b.gold - a.gold);
             
             if (sortedLeaderboard.length === 0) {
-                leaderboardList.innerHTML = '<p>暂无记录</p>';
+                leaderboardList.innerHTML = '<p>Ở đây không có ai~</p>';
                 return;
             }
             
@@ -865,7 +906,7 @@
 
         startButton.addEventListener('click', () => {
             if (!gameState.currentPlayer) {
-                alert('请输入姓名！');
+                alert('Vui lòng nhập tên người chơi!');
                 return;
             }
             
@@ -900,7 +941,7 @@
             }
         });
 
-        updateTotalRounds();
+        loadTeacherWords();
         updateLeaderboard();
         initGame();
     </script>
