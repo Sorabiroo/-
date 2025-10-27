@@ -552,23 +552,20 @@
     </div>
 
     <script>
-        const gameState = {
-            currentLevel: 1,
-            currentRound: 1,
-            totalRounds: 1,
-            gold: 0,
-            selectedCards: [],
-            matchedPairs: 0,
-            totalPairs: 0,
-            isProcessing: false,
-            gameStarted: false,
-            currentPlayer: null,
-            words: {
-                level1: [],
-                level2: []
-            },
-            currentRoundWords: []
+const firebaseConfig = {
+          apiKey: "AIzaSyCH5NQvOnKyi_DMmE0H7ABbh1i7TaG14Q8",
+          authDomain: "chinese-games-6e129.firebaseapp.com",
+          projectId: "chinese-games-6e129",
+          storageBucket: "chinese-games-6e129.firebasestorage.app",
+          messagingSenderId: "836118449937",
+          appId: "1:836118449937:web:60f37c898915971dbe06b0",
+          measurementId: "G-8ZBVR53Q0D",
+          databaseURL: "https://chinese-games-6e129-default-rtdb.asia-southeast1.firebasedatabase.app/"
         };
+
+        // 初始化Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         let leaderboard = JSON.parse(localStorage.getItem('hanziLeaderboard')) || [];
 
@@ -946,4 +943,5 @@
         initGame();
     </script>
 </body>
+
 </html>
